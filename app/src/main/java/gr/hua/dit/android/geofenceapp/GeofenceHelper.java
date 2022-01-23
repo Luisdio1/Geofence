@@ -41,10 +41,13 @@ public class GeofenceHelper extends ContextWrapper {
 
     //Create a pending intent
     public PendingIntent getPendingIntent() {
+
+        //If there is already an intent return it
         if (pendingIntent != null) {
             return pendingIntent;
         }
 
+        //Else create the intent and return it
         Intent intent = new Intent(this,GeofenceBroadcastReceiver.class);
         pendingIntent = PendingIntent.getBroadcast(this,16,intent,PendingIntent.FLAG_UPDATE_CURRENT);
         return pendingIntent;

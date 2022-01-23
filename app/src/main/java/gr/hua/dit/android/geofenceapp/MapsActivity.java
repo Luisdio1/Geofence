@@ -86,12 +86,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private void enableUserLocation() {
 
-        //If permission is Granted
+        //If permission for showing user location is Granted
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             //enable user location
             mMap.setMyLocationEnabled(true);
         } else {
             //Ask for the permission
+            //If we need to show a rational as to why we need the permission
             if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, ACCESS_FINE_LOCATION_PERMISION_CODE);
             } else {
@@ -103,6 +104,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        //Here we are interested for the fine location permission
         if (requestCode == ACCESS_FINE_LOCATION_PERMISION_CODE) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                 //We have the permission
@@ -112,6 +115,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         }
 
+        //Here we are interested for the background location permission which is required to add geofence
         if (requestCode == ACCESS_BACKGROUND_LOCATION_PERMISION_CODE) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                 //We have the permission

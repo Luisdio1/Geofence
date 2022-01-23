@@ -3,6 +3,8 @@ package gr.hua.dit.android.geofenceapp;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.location.Location;
 import android.util.Log;
 import android.widget.Toast;
@@ -19,6 +21,7 @@ public class GeofenceBroadcastReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         // TODO: This method is called when the BroadcastReceiver is receiving
         // an Intent broadcast.
+        Log.d("TAG","Inside broadcast");
         Toast.makeText(context, "Geofence triggered", Toast.LENGTH_SHORT).show();
 
         GeofencingEvent geofencingEvent = GeofencingEvent.fromIntent(intent);
@@ -29,8 +32,6 @@ public class GeofenceBroadcastReceiver extends BroadcastReceiver {
             return;
         }
 
-        List<Geofence> geofenceList = geofencingEvent.getTriggeringGeofences();
-
         //This is the location
         Location location = geofencingEvent.getTriggeringLocation();
 
@@ -40,5 +41,36 @@ public class GeofenceBroadcastReceiver extends BroadcastReceiver {
         //This is the current timestamp
         long time = System.currentTimeMillis();
 
+        //Add what we want to the database in a thread
+        Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                switch (transitionType) {
+                    case Geofence.GEOFENCE_TRANSITION_ENTER:
+                        Point enterPoint = new Point(location.getLatitude(), location.getLongitude(),"Enter", time, context);
+                        try {
+                            DBHelper helper = new DBHelper(context);
+                            SQLiteDatabase database = helper.getReadableDatabase();
+                            Cursor cursor = null;
+                            cursor = database.query(DbContract.TABLE_NAME, null, null, null, null, null, null);
+                            String[] columnNames = cursor.getColumnNames();
+                            Log.d("TAG","Column name" + columnNames[1]);
+                            enterPoint.persist();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        break;
+                    case Geofence.GEOFENCE_TRANSITION_EXIT:
+                        Point exitPoint = new Point(location.getLatitude(), location.getLongitude(),"Exit", time, context);
+                        try {
+                            exitPoint.persist();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        break;
+                }
+            }
+        });
+        t.start();
     }
 }
